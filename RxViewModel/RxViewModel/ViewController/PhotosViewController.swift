@@ -45,16 +45,28 @@ class PhotosViewController: UIViewController {
     }
     
     func initBindingToCollectionView() {
-//        collectionView
-//            .rx
-//            .setDataSource(self.dataSource)
-//            .disposed(by: disposedBag)
+        
+        viewModel.filters.asObservable().subscribe({ [unowned self] _ in
+            print("Selected")
+        })
+            .disposed(by: disposedBag)
+        
         viewModel
             .photos
             .asDriver(onErrorJustReturn: [])
             .drive(collectionView
                 .rx
                 .items(dataSource: self.dataSource))
+            .disposed(by: disposedBag)
+        
+        collectionView
+            .rx
+            .itemSelected
+            .subscribe(onNext: { [unowned self] indexPath in 
+            
+            self.viewModel.filters.value[indexPath.row] = true
+            
+        })
             .disposed(by: disposedBag)
     }
     

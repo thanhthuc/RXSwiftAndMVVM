@@ -16,19 +16,26 @@ import RxOptional
 protocol PhotosViewModelType {
     var photos: Observable<[SectionOfPhotos]> { get }
     var photosSearch: Driver<[SectionOfPhotos]>? { get }
+    
+    var filters: Variable<[Int: Bool]> { get }
 }
 
 class PhotosViewModel: PhotosViewModelType {
+    
+    var filters: Variable<[Int : Bool]>
+    
     var photos: Observable<[SectionOfPhotos]>
     var photosSearch: Driver<[SectionOfPhotos]>?
-    
     
     let disposedBag = DisposeBag()
     var provider: MoyaProvider<Photos500PX>!
     
     
+    
     init() {
         provider = MoyaProvider<Photos500PX>()
+        filters = Variable<[Int: Bool]>([:])
+        
         let photo = Photo(camera: "Camera", createdAt: "10-10", imageUrl: nil)
         let section = SectionOfPhotos(title: "", items: [photo])
         self.photos = Observable.just([section])
