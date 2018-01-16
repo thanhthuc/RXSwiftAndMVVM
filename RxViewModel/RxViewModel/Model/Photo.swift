@@ -41,11 +41,11 @@ struct CurrentPage: Decodable {
 
 struct Photo {
     
-    var camera: String
-    var createdAt: String
-    var imageUrl: URL
+    var camera: String?
+    var createdAt: String?
+    var imageUrl: URL?
     
-    init(camera: String, createdAt: String, imageUrl: URL) {
+    init(camera: String?, createdAt: String?, imageUrl: URL?) {
         self.camera = camera
         self.createdAt = createdAt
         self.imageUrl = imageUrl
@@ -62,24 +62,22 @@ extension Photo: Decodable {
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: MyPhotoKeys.self)
-        let camera = try container.decode(String.self, forKey: .camera)
+        let camera = try? container.decode(String.self, forKey: .camera)
         let createAt = try container.decode(String.self, forKey: .created_at)
         let imageUrl = try container.decode(URL.self, forKey: .image_url)
         self.init(camera: camera, createdAt: createAt, imageUrl: imageUrl)
     }
 }
 
-struct PhotosSectionModel: SectionModelType {
-    
-    var title: String = "Heroes"
-    
-    var identity: String {
-        return title
-    }
-    
+struct SectionOfPhotos {
+    var title: String
     var items: [Photo]
+}
+
+extension SectionOfPhotos: SectionModelType {
     
-    init(original: PhotosSectionModel, items: [Photo]) {
+    init(original: SectionOfPhotos, items: [Photo]) {
+        self = original
         self.items = items
     }
 }

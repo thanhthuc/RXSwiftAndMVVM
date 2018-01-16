@@ -16,8 +16,8 @@ class PhotosViewController: UIViewController {
     @IBOutlet weak var searchButton: UIBarButtonItem!
     @IBOutlet weak var filterButton: UIBarButtonItem!
     @IBOutlet weak var collectionView: UICollectionView!
-    var dataSource: RxCollectionViewSectionedReloadDataSource<PhotosSectionModel>!
-    var searchDataSource: RxCollectionViewSectionedReloadDataSource<PhotosSectionModel>! 
+    var dataSource: RxCollectionViewSectionedReloadDataSource<SectionOfPhotos>!
+    var searchDataSource: RxCollectionViewSectionedReloadDataSource<SectionOfPhotos>! 
     
     let searchContentController = UITableViewController()
     var searchController: UISearchController!
@@ -45,23 +45,21 @@ class PhotosViewController: UIViewController {
     }
     
     func initBindingToCollectionView() {
-        collectionView
-            .rx
-            .setDataSource(self.dataSource)
+//        collectionView
+//            .rx
+//            .setDataSource(self.dataSource)
+//            .disposed(by: disposedBag)
+        viewModel
+            .photos
+            .asDriver(onErrorJustReturn: [])
+            .drive(collectionView
+                .rx
+                .items(dataSource: self.dataSource))
             .disposed(by: disposedBag)
-        
-//        viewModel
-//            .photos!
-//            .asObservable()
-//            .bind(to: collectionView.rx.items(cellIdentifier: "PhotoCollectionViewCell", cellType: PhotoCollectionViewCell.self)) {
-//              row, data, cell in
-//            
-//                cell.titleLabel.text = "Nguyen Thanh Thuc"
-//        }.disposed(by: disposedBag)
     }
     
     func initDataSource() {
-        self.dataSource = RxCollectionViewSectionedReloadDataSource<PhotosSectionModel>(
+        self.dataSource = RxCollectionViewSectionedReloadDataSource<SectionOfPhotos>(
             configureCell: { 
                 sectionedDataSource, collectionView, indexPath, element in 
                 return BindableCellFactory<PhotoCollectionViewCell, Photo>.setupCollectionViewCellFromNib(

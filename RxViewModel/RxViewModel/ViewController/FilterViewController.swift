@@ -16,8 +16,8 @@ class FilterViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var doneButton: UIBarButtonItem!
     
-    var dataSource: RxTableViewSectionedReloadDataSource<PhotosSectionModel>!
-    var searchDataSource: RxTableViewSectionedReloadDataSource<PhotosSectionModel>! 
+    var dataSource: RxTableViewSectionedReloadDataSource<SectionOfPhotos>!
+    var searchDataSource: RxTableViewSectionedReloadDataSource<SectionOfPhotos>! 
     var viewModel: PhotosViewModelType!
     
     let disposedBag = DisposeBag()
@@ -52,7 +52,7 @@ class FilterViewController: UIViewController {
     }
     
     func initDataSource() {
-        self.dataSource = RxTableViewSectionedReloadDataSource<PhotosSectionModel>(
+        self.dataSource = RxTableViewSectionedReloadDataSource<SectionOfPhotos>(
             configureCell: { 
                 dataSource, tableView, indexPath, element  in 
                 
@@ -63,7 +63,7 @@ class FilterViewController: UIViewController {
                                           viewModel: element)
         })
         
-        self.searchDataSource = RxTableViewSectionedReloadDataSource<PhotosSectionModel>(
+        self.searchDataSource = RxTableViewSectionedReloadDataSource<SectionOfPhotos>(
             configureCell: { 
                 dataSource, tableView, indexPath, element  in 
                 

@@ -14,13 +14,13 @@ import Moya
 import RxOptional
 
 protocol PhotosViewModelType {
-    var photos: Observable<[Photo]>? { get }
-    var photosSearch: Observable<[Photo]>? { get }
+    var photos: Observable<[SectionOfPhotos]> { get }
+    var photosSearch: Driver<[SectionOfPhotos]>? { get }
 }
 
 class PhotosViewModel: PhotosViewModelType {
-    var photos: Observable<[Photo]>?
-    var photosSearch: Observable<[Photo]>?
+    var photos: Observable<[SectionOfPhotos]>
+    var photosSearch: Driver<[SectionOfPhotos]>?
     
     
     let disposedBag = DisposeBag()
@@ -29,25 +29,26 @@ class PhotosViewModel: PhotosViewModelType {
     
     init() {
         provider = MoyaProvider<Photos500PX>()
+        let photo = Photo(camera: "Camera", createdAt: "10-10", imageUrl: nil)
+        let section = SectionOfPhotos(title: "", items: [photo])
+        self.photos = Observable.just([section])
         
-        provider
-            .rx
-            .request(.photos())
-            .subscribe { event in 
-                switch event {
-                    
-                case .success(let response):
-                    print(response.data)
-                    
-                    let currentPage = try! JSONDecoder().decode(CurrentPage.self, from: response.data)
+        self.photos = Observable<[SectionOfPhotos]>.create { 
+            (observer) -> Disposable in
+            self.provider.request(.photos(), completion: { (result) in
+                if let error = result.error {
+                   observer.onError(error) 
+                } else {
+                    guard let data = result.value?.data else { return }
+                    let currentPage = try! JSONDecoder().decode(CurrentPage.self, from: data)
                     print(currentPage)
-                    //self.photos = Observable.just(photos)
-                case .error(let error):
-                    print(error)
-                    self.photos = Observable.just([])
+                    let photos = currentPage.photos
+                    let sections = SectionOfPhotos(title: "First section", items: photos)
+                    observer.onNext([sections])
                 }
-            }
-            .disposed(by: disposedBag)
+            })
+            return Disposables.create()
+        }
         
     }
 }

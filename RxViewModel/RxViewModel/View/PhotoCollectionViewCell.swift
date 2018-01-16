@@ -25,7 +25,11 @@ extension PhotoCollectionViewCell {
     typealias V = Photo
     
     func bindViewModel(viewModel: Photo) {
-        let data = NSData(contentsOf: viewModel.imageUrl)
-        imageView.image = UIImage(data: data! as Data)
+        if let camera = viewModel.camera {
+        	titleLabel.text = camera    
+        }
+        guard let imageUrl = viewModel.imageUrl else { return  }
+        let data = NSData(contentsOf: imageUrl)
+		imageView.image = UIImage(data: data! as Data)
     }
 }
