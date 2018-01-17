@@ -8,6 +8,55 @@
 
 import UIKit
 import Moya
+import RxSwift
+
+struct ErrorType {
+    var statusCode: String
+    var errMessage: String
+}
+
+struct Token {
+    
+}
+
+extension Reactive where Base: MoyaProvider<Photos500PX> {
+    
+    func response(_ provider: MoyaProvider<Photos500PX>, target: Photos500PX) -> Observable<Response>  {
+        
+        return Observable.create({ (observer) in
+            
+            let task = provider.request(target, completion: { (result) in
+                
+                switch result {
+                case .success(let response):
+                    print(response.statusCode)
+                    observer.onNext(response)
+                    observer.onCompleted()
+                case .failure(let error):
+                    print(error.localizedDescription)
+                    observer.onError(error)
+                }
+            })
+            
+            return Disposables.create {
+                task.cancel()
+            }
+        }).retryWhen({ (errors: Observable<MoyaError>) in
+            
+            return errors.enumerated().flatMap({ (tuple: (retryCount: Int, error: MoyaError)) -> Observable<Token> in
+                if /*error.statusCode == 401 && */tuple.retryCount < 1 {
+                    // try with refresh token
+                }
+                return Observable.error(tuple.error)
+            })
+        })
+    }
+    
+}
+
+//http://sssslide.com/speakerdeck.com/slightair/rxswift-plus-api-request-plus-mvvm
+
+
 
 private extension String {
     var URLEscapedString: String {
@@ -16,6 +65,7 @@ private extension String {
 }
 
 enum Photos500PX {
+    case requestToken()
     case photos()
     case search(name: String) 
     case filter(tags: String)
@@ -29,6 +79,9 @@ extension Photos500PX: TargetType {
     
     var path: String {
         switch self {
+        
+        case .requestToken():
+            return "oauth/access_token"
         case .photos:
             return "photos/"
         case .filter(let tags):
@@ -40,6 +93,9 @@ extension Photos500PX: TargetType {
     
     var method: Moya.Method {
         switch self {
+        
+        case .requestToken():
+            return .post
         case .photos:
             return .get
         case .filter:
@@ -62,7 +118,17 @@ extension Photos500PX: TargetType {
     }
     
     var params: [String: String] {
-        return ["consumer_key": "u2Any0rPEGaHb1JYpnSsAWoaRpBPVtEzEyfB8m5D"]
+        switch self {
+        case .requestToken():
+            return [
+                "x_auth_mode": "client_auth",
+                "x_auth_password": "",
+                "x_auth_username": ""
+            ]
+        default:
+        	return ["consumer_key": "u2Any0rPEGaHb1JYpnSsAWoaRpBPVtEzEyfB8m5D"]    
+        }
+        
     }
     
     

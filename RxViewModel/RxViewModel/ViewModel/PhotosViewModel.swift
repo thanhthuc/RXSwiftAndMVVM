@@ -44,7 +44,7 @@ class PhotosViewModel: PhotosViewModelType {
             (observer) -> Disposable in
             self.provider.request(.photos(), completion: { (result) in
                 if let error = result.error {
-                   observer.onError(error) 
+                    observer.onError(error) 
                 } else {
                     guard let data = result.value?.data else { return }
                     let currentPage = try! JSONDecoder().decode(CurrentPage.self, from: data)
@@ -56,6 +56,5 @@ class PhotosViewModel: PhotosViewModelType {
             })
             return Disposables.create()
         }
-        
     }
 }
