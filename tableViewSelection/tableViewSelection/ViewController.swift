@@ -28,54 +28,38 @@ class ViewController: UIViewController {
 
 extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let cell = tableView.cellForRow(at: indexPath) as! SelectTableViewCell
         
-        guard let boolValue = dictSelected[indexPath] else {
-            dictSelected[indexPath] = true
-            cell.selectImageView.image = UIImage(named: "checked")
-            return
+        var boolValue = false
+        if let value = dictSelected[indexPath] {
+            boolValue = value
+        } else {
+            dictSelected[indexPath] = false
+            boolValue = dictSelected[indexPath]!
         }
         
-        switch indexPath.section {
-        case 0:
-            let numOfRow = tableView.numberOfRows(inSection: indexPath.section)
-            
-            if indexPath.row == 0 {
-                for i in 1..<numOfRow {
-                    if i != indexPath.row {
-                        let indexPath = IndexPath(row: i, section: 0)
-                        if !boolValue {
-                            dictSelected[IndexPath(row: 0, section: 0)] = true
-                        	dictSelected[indexPath] = false
-                        }
+        let numOfRow = tableView.numberOfRows(inSection: indexPath.section)
+        
+        if indexPath.row == 0 {
+            let boolAtFirst = !boolValue
+            dictSelected[IndexPath(row: 0, section: indexPath.section)] = boolAtFirst
+            for i in 1..<numOfRow {
+                if i != indexPath.row {
+                    let indexPath = IndexPath(row: i, section: indexPath.section)
+                    if !boolAtFirst {
+                        dictSelected[IndexPath(row: 0, section: indexPath.section)] = false
+                        dictSelected[indexPath] = false
+                    } else {
+                        dictSelected[IndexPath(row: 0, section: indexPath.section)] = true
+                        dictSelected[indexPath] = true
                     }
                 }
-                
-                tableView.reloadSections(IndexSet(integer: indexPath.section), with: .fade)
-            } else {
-            	let indexPath = IndexPath(row: 0, section: 0)    
-                let cell = tableView.cellForRow(at: indexPath) as! SelectTableViewCell
-                cell.selectImageView.image = UIImage(named: "unchecked") 
-                dictSelected[indexPath] = !dictSelected[indexPath]!
-                tableView.reloadSections(IndexSet(integer: indexPath.section), with: .fade)
             }
-            
-            
-        case 1:
-            if indexPath.row == 0 {
-                tableView.reloadSections(IndexSet(integer: indexPath.section), with: .fade)
-                
-            }
-        default:
-            if indexPath.row == 0 {
-                tableView.reloadSections(IndexSet(integer: indexPath.section), with: .fade)
-                
-            }
+        } else {
+            let indexPathAt0 = IndexPath(row: 0, section: indexPath.section)    
+            dictSelected[indexPathAt0] = false
+            dictSelected[indexPath] = !dictSelected[indexPath]!
         }
-        
-        dictSelected[indexPath] = !boolValue
-        cell.selectImageView.image = dictSelected[indexPath]! ? UIImage(named: "checked") : UIImage(named: "unchecked")
-        
+        tableView.reloadSections(IndexSet(integer: indexPath.section), with: .fade)   
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -96,7 +80,7 @@ extension ViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 8
+        return 10
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
